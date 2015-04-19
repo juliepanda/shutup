@@ -40,13 +40,14 @@
  
 <script type="text/javascript">
     var recognizing = false;
-
     var ignore_onend;
+    
+    var time0 = new Date().getTime();
+    var time1 = new Date().getTime();
 
         // check that your browser supports the API
         if (!('webkitSpeechRecognition' in window)) {
             alert("Sorry, your Browser does not support the Speech API and you should upgrade");
-            
         } else {
             // Create the recognition object and define the event handlers
 
@@ -84,11 +85,18 @@
 
                 // Assemble the transcript from the array of results
                 for (var i = event.resultIndex; i < event.results.length; ++i) {
-                        interimTranscript += event.results[i][0].transcript;
+                  interimTranscript += event.results[i][0].transcript;
                 }
                 console.log("interim:  " + interimTranscript);
-
-
+                if (time1 > time0) {
+                  time0 = new Date().getTime();
+                } else{
+                  time1 = new Date().getTime();
+                };
+                if (Math.abs(time1 - time0) > 3000) {
+                  console.log("TROLL VIDEO IS PLAYING");
+                  
+                }
             };
 
             $("#start_button").click(function(e) {
@@ -107,6 +115,7 @@
                 }
             });
         }
+
 
 var two_line = /\n\n/g;
 var one_line = /\n/g;
