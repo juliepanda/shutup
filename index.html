@@ -3,126 +3,216 @@
   <head>
     <meta charset='utf-8'>
     <title>Speech</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    </head>
-    <body>
-      <div id="results">
-<div id="transcript">&nbsp;</div>
-  </div>
-<br>
-<div id="instructions">&nbsp;</div>
-<div id="controls">
-<button id="start_button">Click to Start</button>
-</div>
- 
- 
-<style>
-    #controls {
-        text-align: center;
-    }
-    #start_button {
-        font-size: 16pt;
-    }
-    #transcript {
-        color: darkred;
-        font-size: 16pt;
-        border: 1px solid #ccc;
-        padding: 5px;
-        text-align: center;
-    }
-    #instructions {
-        color: darkblue;
-        font-size: 14pt;
-        text-align: center;
-    }
-</style>
- 
- 
-<script type="text/javascript">
-    var recognizing = false;
-    var ignore_onend;
-    
-    var time0 = new Date().getTime();
-    var time1 = new Date().getTime();
-
-        // check that your browser supports the API
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("Sorry, your Browser does not support the Speech API and you should upgrade");
-        } else {
-            // Create the recognition object and define the event handlers
-
-            var recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;         // keep processing input until stopped
-            recognition.interimResults = true;     // show interim results
-            recognition.lang = 'en-GB';           // specify the language
-
-            recognition.onstart = function() {
-                recognizing = true;
-                $('#instructions').html('Speak slowly and clearly');
-                $('#start_button').html('Click to Stop');
-            };
-
-            recognition.onerror = function(event) {
-                console.log("There was a recognition error...");
-                ignore_onend = true;
-            };
-
-            recognition.onend = function() {
-                recognizing = false;
-                $('#instructions').html('&nbsp;');
-                if (ignore_onend) {
-                  return;
-                }
-                if (window.getSelection) {
-                  window.getSelection().removeAllRanges();
-                  var range = document.createRange();
-                  window.getSelection().addRange(range);
-                }
-            };
-
-            recognition.onresult = function(event) {
-                var interimTranscript = '';
-
-                // Assemble the transcript from the array of results
-                for (var i = event.resultIndex; i < event.results.length; ++i) {
-                  interimTranscript += event.results[i][0].transcript;
-                }
-                console.log("interim:  " + interimTranscript);
-                if (time1 > time0) {
-                  time0 = new Date().getTime();
-                } else{
-                  time1 = new Date().getTime();
-                };
-                if (Math.abs(time1 - time0) > 3000) {
-                  console.log("TROLL VIDEO IS PLAYING");
-                  
-                }
-            };
-
-            $("#start_button").click(function(e) {
-                e.preventDefault();
-
-                if (recognizing) {
-                    recognition.stop();
-                    $('#start_button').html('Click to Start Again');
-                    recognizing = false;
-                } else {
-                    // Request access to the User's microphone and Start recognizing voice input
-                    recognition.start();
-                    $('#instructions').html('Allow the browser to use your Microphone');
-                    $('#start_button').html('waiting');
-                    $('#transcript').html('&nbsp;');
-                }
-            });
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+        }
+        p {
+            font-family: 'Roboto', sans-serif;
+            font-size: 18px;
+        }
+        #controls {
+            text-align: center;
+        }
+        #start_button {
+            font-size: 16pt;
+        }
+        #transcript {
+            color: darkred;
+            font-size: 16pt;
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+        }
+        #instructions {
+            color: darkblue;
+            font-size: 14pt;
+            text-align: center;
         }
 
+        .holder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
 
-var two_line = /\n\n/g;
-var one_line = /\n/g;
-function linebreak(s) {
-  return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-}
-var first_char = /\S/;
+        #start_button {
+            margin-top: 45%;
+            padding: 15px;
+            text-transform: uppercase;
+            background-color: #00bcd4;
+            border: 0;
+        }
+    </style>
+    </head>
+
+    <body>
+        <div class="holder">
+            <center><button id="start_button">Click to Start</button></center>
+        </div>
+
+    
+
+ 
+    <script type="text/javascript">
+        var recognizing = false;
+        var ignore_onend;
+        var played = false;
+        var gospam = false;
+        var time0 = new Date().getTime();
+        var time1 = new Date().getTime();
+
+            // check that your browser supports the API
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Sorry, your Browser does not support the Speech API and you should upgrade");
+            } else {
+                // Create the recognition object and define the event handlers
+
+                var recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;         // keep processing input until stopped
+                recognition.interimResults = true;     // show interim results
+                recognition.lang = 'en-GB';           // specify the language
+
+                recognition.onstart = function() {
+                    recognizing = true;
+                    $('#instructions').html('Speak slowly and clearly');
+                    $('#start_button').html('Click to Stop');
+                };
+
+                recognition.onerror = function(event) {
+                    console.log("There was a recognition error...");
+                    ignore_onend = true;
+                };
+
+                recognition.onend = function() {
+                    recognizing = false;
+                    $('#instructions').html('&nbsp;');
+                    if (ignore_onend) {
+                      return;
+                    }
+                    if (window.getSelection) {
+                      window.getSelection().removeAllRanges();
+                      var range = document.createRange();
+                      window.getSelection().addRange(range);
+                    }
+                };
+
+                recognition.onresult = function(event) {
+                    var counter = 0;
+                    var interimTranscript = '';
+
+                    var audioElement = document.createElement('audio');
+                    audioElement.setAttribute('src', 'slowclap.mp3');
+                    audioElement.setAttribute('autoplay', 'autoplay');
+                    //audioElement.load()
+
+                    $.get();
+
+
+                    
+                    // Assemble the transcript from the array of results
+                    for (var i = event.resultIndex; i < event.results.length; ++i) {
+                      interimTranscript += event.results[i][0].transcript;
+                    }
+
+                    counter += 1;
+                    spam(interimTranscript);
+                    console.log("interim:  " + interimTranscript);
+                    if (time1 > time0) {
+                      time0 = new Date().getTime();
+                    } else{
+                      time1 = new Date().getTime();
+                    };
+                    if (Math.abs(time1 - time0) > 3000) {
+
+                        if (played == false) {
+                           console.log("TROLL VIDEO IS PLAYING");
+                      audioElement.addEventListener("load", function() {
+                        audioElement.delay(5000).play();
+                    }, true); 
+                      played = true;
+                        }
+                    
+                    if (Math.abs(Date.now() - time0) > 3000) {
+
+                        gospam = true;
+                      
+                    }
+                    if (gospam === true) {
+                        
+                    }
+                    
+
+                    if (Math.abs(Date.now() - time0) > 10000) {
+
+                        $(".holder").empty()
+                        }
+                      
+                    }
+                };
+
+                $("#start_button").click(function(e) {
+                    e.preventDefault();
+
+                    if (recognizing) {
+                        recognition.stop();
+                        $('#start_button').html('Click to Start Again');
+                        recognizing = false;
+                    } else {
+                        // Request access to the User's microphone and Start recognizing voice input
+                        recognition.start();
+                        $('#instructions').html('Allow the browser to use your Microphone');
+                        $('#start_button').html('waiting');
+                        $('#transcript').html('&nbsp;');
+                    }
+                });
+            }
+
+
+    var two_line = /\n\n/g;
+    var one_line = /\n/g;
+    function linebreak(s) {
+      return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+    }
+    var first_char = /\S/;
+
+    function spam (interimTranscript) {
+                        var sarcasm = ['wow', 'great', 'so cool', 'please tell me more', 'go on', 'amazing'];
+                        var rotations = ['-35', '-25', '-15', '-10', '-5', '0', '5', '10', '15', '25', '35'];
+                        var colors = ['#df3ffa', '#ff3f80', '#ff1643', '#2f4efd', '#2878ff', '#00afff', '#00e4ff', '#75ff02', '#ffff00'];
+
+                        $("#start_button").delay(500).fadeOut(1000)
+                        $("<p>" + interimTranscript + "</p>")
+                            .appendTo(".holder")
+                            .css({
+                                "position": "absolute",
+                                "z-index": 2,
+                                "display": "block",
+                                "color": '#fff',
+                                "transform": "rotate(" + rotations[Math.floor(Math.random() * rotations.length)] + "deg)",
+                                "left":  Math.floor(Math.random() * 100) + "%",
+                                "top": Math.floor(Math.random() * 100) + "%"
+                            })
+                            .delay(500)
+                            .fadeOut(1000)
+
+                            $("<p>" + sarcasm[Math.floor(Math.random() * sarcasm.length)] + "</p>")
+                                .appendTo(".holder")
+                                .css({
+                                    "position": "absolute",
+                                    "z-index": 2,
+                                    "display": "block",
+                                    "font-size": 16 + Math.floor(Math.random() * 24) + "px",
+                                    "color": colors[Math.floor(Math.random() * colors.length)],
+                                    "transform": "rotate(" + rotations[Math.floor(Math.random() * rotations.length)] + "deg)",
+                                    "left":  Math.floor(Math.random() * 100) + "%",
+                                    "top": Math.floor(Math.random() * 100) + "%"
+                                })
+                    }
   
 </script>
 
